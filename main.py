@@ -39,12 +39,12 @@ def list_products_in_store(store):
     for index, product in enumerate(products, start=1):
         print(f"{index}. ", end="")
         product.show()
-    print("------\n")
+    print("------")
 
 
 def show_total_amount_in_store(store):
     total_amount = store.get_total_quantity()
-    print(f"Total of {total_amount} items in store\n")
+    print(f"Total of {total_amount} items in store")
 
 
 def make_order(store):
@@ -54,26 +54,36 @@ def make_order(store):
     shopping_list = []
     while True:
         product_choice = input("Which product # do you want? ")
-        product_amount = input("What amount do you want? ")
         if not product_choice:
-            if shopping_list:
-                total = store.order(shopping_list)
-                if total:
-                    print("********")
-                    print(f"Order made! Total payment: ${int(total)}")
             break
+        product_amount = input("What amount do you want? ")
         try:
-            int(product_choice)
-        except ValueError:
-            print("Error adding product!\n")
+            product_choice = int(product_choice)
+            if product_choice < 1 or product_choice > len(available_products):
+                raise ValueError("Invalid product number!")
+
+            if not product_amount.strip():
+                raise ValueError("You need to enter an amount!")
+
+            product_amount = int(product_amount)
+            if product_amount <= 0:
+                raise ValueError("Amount has to be a positive number!")
+            chosen_product = available_products[product_choice - 1]
+            if product_amount > chosen_product.quantity:
+                raise ValueError("Amount is larger than what exists!")
+
+        except ValueError as e:
+            print(f"Error adding product: {e}\n")
             continue
-        if int(product_choice) > len(available_products):
-            print("Error adding product!\n")
-            continue
-        else:
-            chosen_product = available_products[int(product_choice) - 1]
-            shopping_list.append((chosen_product, product_amount))
-            print("Product added to list!\n")
+
+        shopping_list.append((chosen_product, product_amount))
+        print("Product added to list!\n")
+
+    if shopping_list:
+        # no further validation required (all possible exceptions are handled & caught beforehand)
+        total = store.order(shopping_list)
+        print("********")
+        print(f"Order made! Total payment: ${total}")
 
 
 def start(store):
